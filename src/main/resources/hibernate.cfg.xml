@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+"-//Hibernate/Hibernate Configuration DTD//EN"
+"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+ 
+<hibernate-configuration>
+    <session-factory>
+        <!-- <property name="hibernate.connection.url">jdbc:jtds:sqlserver://127.0.0.1:1433/STP;loginTimeout=60;socketTimeout=120;queryTimeout=90</property> -->
+        <!--<property name="hibernate.connection.url">jdbc:jtds:sqlserver://10.200.24.169:1433/STP_Test;loginTimeout=60;socketTimeout=120;queryTimeout=90</property>-->
+        <property name="hibernate.connection.url">jdbc:jtds:sqlserver://10.200.24.142:1433/STP;loginTimeout=60;socketTimeout=120;queryTimeout=90</property>
+        <property name="hibernate.connection.driver_class">net.sourceforge.jtds.jdbc.Driver</property>
+        <property name="hibernate.connection.username">stpa</property>
+        <property name="hibernate.connection.password">stpa</property>
+        <property name="dialect">org.hibernate.dialect.SQLServer2008Dialect</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>        
+        <property name="hibernate.show_sql">false</property>
+        <property name="hibernate.use_outer_join">true</property> 
+        <!-- <mapping class="hr.inforbis.timezone.Country"/> -->       
+        <mapping class="hr.inforbis.timezone.Zone"/>
+    </session-factory>
+</hibernate-configuration>
