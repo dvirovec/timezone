@@ -41,16 +41,15 @@ public class App
                 System.exit(0);
             }
 
-            if (!dataMode.equals("DB") && args.length==1){
-                System.out.println("Filename parameter not entered!");
-                System.exit(0);
-            }
-            else {
-                filePath = args[1] + "." + (dataMode.equals("SQL") ? "sql" : "csv");
-            }
-
+            if (!dataMode.equals("DB")){            	            
+            	if (args.length==1) { 
+	                System.out.println("Filename parameter not entered!");
+	                System.exit(0);
+            	} 
+            	
+            	filePath = args[1] + "." + (dataMode.equals("SQL") ? "sql" : "csv");            	            	
+            }            
         }
-
 
 
         if (dataMode.equals("DB")) {

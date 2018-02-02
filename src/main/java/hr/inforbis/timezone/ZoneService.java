@@ -85,13 +85,15 @@ public static void getZones() {
 	JsonArray list = zonesElement.getAsJsonArray();
 
 	PrintStream output = null;
-
-	try {
-		output = new PrintStream(new FileOutputStream(App.filePath));
-	}
-	catch (FileNotFoundException fnfe){
-		System.out.println("File does not exist!");
-		System.exit(0);
+	
+	if(!App.dataMode.equals("DB")) {
+		try {
+			output = new PrintStream(new FileOutputStream(App.filePath));
+		}
+		catch (FileNotFoundException fnfe){
+			System.out.println("File does not exist!");
+			System.exit(0);
+		}
 	}
 
 	for (JsonElement element: list) {
@@ -113,9 +115,7 @@ public static void getZones() {
 					countryName = entry.getValue().getAsString();
 					break;
 			}
-
 		}
-
 
 		try {
 			Thread.sleep(1000);
@@ -163,6 +163,7 @@ public static void getZones() {
 
 		//ovo se izvodi samo ako je db
 		if(App.dataMode.equals("DB")) {
+			
 			if (nextTimeZone.isEmpty()) dst = 0;
 
 			Session session = App.sf.openSession();

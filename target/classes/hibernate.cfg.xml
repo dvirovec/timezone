@@ -8,7 +8,7 @@
         <!-- <property name="hibernate.connection.url">jdbc:jtds:sqlserver://127.0.0.1:1433/STP;loginTimeout=60;socketTimeout=120;queryTimeout=90</property> -->
         <!--<property name="hibernate.connection.url">jdbc:jtds:sqlserver://10.200.24.169:1433/STP_Test;loginTimeout=60;socketTimeout=120;queryTimeout=90</property>-->
         <!--<property name="hibernate.connection.url">jdbc:jtds:sqlserver://10.200.24.142:1433/STP;loginTimeout=60;socketTimeout=120;queryTimeout=90</property>-->
-        <property name="hibernate.connection.url">jdbc:jtds:sqlserver://192.168.5.14:1433/STP;loginTimeout=60;socketTimeout=120;queryTimeout=90</property>
+        <property name="hibernate.connection.url">jdbc:jtds:sqlserver://127.0.0.1:1433/STP;loginTimeout=60;socketTimeout=120;queryTimeout=90</property>
         <property name="hibernate.connection.driver_class">net.sourceforge.jtds.jdbc.Driver</property>
         <property name="hibernate.connection.username">stpa</property>
         <property name="hibernate.connection.password">stpa</property>
