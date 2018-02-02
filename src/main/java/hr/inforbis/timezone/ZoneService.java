@@ -1,5 +1,8 @@
 package hr.inforbis.timezone;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
@@ -80,117 +83,40 @@ public static void getZones() {
 	JsonElement zonesElement = obj.get("zones");
 				
 	JsonArray list = zonesElement.getAsJsonArray();
-		
+
+	PrintStream output = null;
+
+	try {
+		output = new PrintStream(new FileOutputStream(App.filePath));
+	}
+	catch (FileNotFoundException fnfe){
+		System.out.println("File does not exist!");
+		System.exit(0);
+	}
+
 	for (JsonElement element: list) {
-				
+
 		JsonObject zone = element.getAsJsonObject();
-			
+
 		Set<Map.Entry<String, JsonElement>> entries = zone.entrySet();
-					
-		for (Map.Entry<String, JsonElement> entry: entries) {
-			
-			switch(entry.getKey()) {
+
+		for (Map.Entry<String, JsonElement> entry : entries) {
+
+			switch (entry.getKey()) {
 				case "zoneName":
 					zoneName = entry.getValue().getAsString();
 					break;
 				case "countryCode":
 					countryCode = entry.getValue().getAsString();
 					break;
-				case "countryName":			
-					countryName = entry.getValue().getAsString();			
-					break;								
+				case "countryName":
+					countryName = entry.getValue().getAsString();
+					break;
 			}
-			
+
 		}
-			
-		
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			apiUrl = String.format(url, API_KEY, zoneName);
-						
-			json = ClientBuilder.newClient().target(apiUrl).request().accept(MediaType.APPLICATION_JSON).get(String.class);
-											
-			jel = gparser.parse(json);
-			
-			obj = jel.getAsJsonObject();
-			
-			entries = obj.entrySet();
-						
-			for (Map.Entry<String, JsonElement> zoneData: entries) {
-				
-				switch(zoneData.getKey()) {				
-					case "dstStart":			
-						dstStart = (Long)zoneData.getValue().getAsLong()*1000;			
-						break;
-					case "dstEnd":
-						dstEnd = (Long)zoneData.getValue().getAsLong()*1000;		
-						break;			
-					case "dst":						
-						dst = (Integer)zoneData.getValue().getAsInt();
-						break;
-					case "gmtOffset":
-						utcOffset = (zoneData.getValue().getAsLong()*1000);
-						break;
-					case "abbreviation":
-						timeZone = zoneData.getValue().getAsString();
-						break;
-					case "nextAbbreviation":
-						nextTimeZone = zoneData.getValue().getAsString();
-						break;						
-				}				
-			}
-			
-			if(nextTimeZone.isEmpty()) dst = 0;
-			
-			Zone tzone = null;
-			
-			Session session = App.sf.openSession();	
-						
-			Query q = session.createQuery(zone_hql);
-			q.setParameter("zoneName", zoneName);
-			List<Zone> zoneList = q.list();
-			
-			if(!zoneList.isEmpty()) {
-				
-				tzone = zoneList.get(0);
-				tzone.setCountryCode(countryCode);
-				
-								
-				tzone.setDst(dst);
-				
-				tzone.setNextTimeZone(nextTimeZone);
-				tzone.setTimeZone(nextTimeZone);
-				tzone.setUtcOffset(utcOffset);
-				tzone.setZoneName(zoneName);
-				
-			}
-			else
-				tzone = new Zone(countryCode, zoneName, zoneCode, utcOffset, dstStart, dstEnd, dst, timeZone, nextTimeZone);	
 
 
-			if(dst==0) {
-				tzone.setDstEnd(null);
-				tzone.setDstStart(null);	
-			}
-			else
-			{
-				tzone.setDstEnd(dstEnd);
-				tzone.setDstStart(dstStart);	
-			}
-
-			
-			Transaction tx = session.beginTransaction();		
-			session.persist(tzone);		
-			tx.commit();
-			
-			System.out.println(tzone.getZoneName());
-			
-			
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
@@ -198,6 +124,105 @@ public static void getZones() {
 			e.printStackTrace();
 		}
 
+		apiUrl = String.format(url, API_KEY, zoneName);
+
+		json = ClientBuilder.newClient().target(apiUrl).request().accept(MediaType.APPLICATION_JSON).get(String.class);
+
+		jel = gparser.parse(json);
+
+		obj = jel.getAsJsonObject();
+
+		entries = obj.entrySet();
+
+		for (Map.Entry<String, JsonElement> zoneData : entries) {
+
+			switch (zoneData.getKey()) {
+				case "dstStart":
+					dstStart = (Long) zoneData.getValue().getAsLong() * 1000;
+					break;
+				case "dstEnd":
+					dstEnd = (Long) zoneData.getValue().getAsLong() * 1000;
+					break;
+				case "dst":
+					dst = (Integer) zoneData.getValue().getAsInt();
+					break;
+				case "gmtOffset":
+					utcOffset = (zoneData.getValue().getAsLong() * 1000);
+					break;
+				case "abbreviation":
+					timeZone = zoneData.getValue().getAsString();
+					break;
+				case "nextAbbreviation":
+					nextTimeZone = zoneData.getValue().getAsString();
+					break;
+			}
+		}
+
+		Zone tzone = null;
+		tzone = new Zone(countryCode, zoneName, zoneCode, utcOffset, dstStart, dstEnd, dst, timeZone, nextTimeZone);
+
+		//ovo se izvodi samo ako je db
+		if(App.dataMode.equals("DB")) {
+			if (nextTimeZone.isEmpty()) dst = 0;
+
+			Session session = App.sf.openSession();
+
+			Query q = session.createQuery(zone_hql);
+			q.setParameter("zoneName", zoneName);
+			List<Zone> zoneList = q.list();
+
+			if (!zoneList.isEmpty()) {
+
+				tzone = zoneList.get(0);
+				tzone.setCountryCode(countryCode);
+				tzone.setDst(dst);
+
+				tzone.setNextTimeZone(nextTimeZone);
+				tzone.setTimeZone(nextTimeZone);
+				tzone.setUtcOffset(utcOffset);
+				tzone.setZoneName(zoneName);
+
+			} else {
+				tzone = new Zone(countryCode, zoneName, zoneCode, utcOffset, dstStart, dstEnd, dst, timeZone, nextTimeZone);
+			}
+
+		if (dst == 0) {
+			tzone.setDstEnd(null);
+			tzone.setDstStart(null);
+		} else {
+			tzone.setDstEnd(dstEnd);
+			tzone.setDstStart(dstStart);
+		}
+		Transaction tx = session.beginTransaction();
+		session.persist(tzone);
+		tx.commit();
+		}
+		else {
+
+			String sqlTemplate = "MERGE MData.TimeZone AS T \n"+
+			"USING (SELECT '%s' AS countryCode, '%s' AS zoneName, %d AS utcOffset, %d AS dstStart, %d AS dstEnd, %d AS dst, '%s' AS timeZone, '%s' AS nextTimeZone) AS S \n" +
+			"ON (T.zoneName = S.zoneName) \n" +
+			"WHEN MATCHED THEN \n" +
+			"	UPDATE SET countryCode = S.countryCode, utcOffset = S.utcOffset, dstStart = S.dstStart, dstEnd = S.dstEnd, dst = S.dst, timeZone = S.timeZone, nextTimeZone = S.nextTimeZone \n" +
+			"WHEN NOT MATCHED THEN \n" +
+			"	INSERT (countryCode, zoneName, utcOffset, dstStart, dstEnd, dst, timeZone, nextTimeZone) \n"+
+			"	VALUES (S.countryCode, S.zoneName, S.utcOffset, S.dstStart, S.dstEnd, S.dst, S.timeZone, S.nextTimeZone);\n\n";
+
+			String csvTemplate = "%s;%s;%d;%d;%d;%d;%s;%s;\n";
+
+			output.print(String.format(App.dataMode.equals("SQL") ? sqlTemplate : csvTemplate, tzone.getCountryCode(),tzone.getZoneName(),tzone.getUtcOffset(),tzone.getDstStart(),tzone.getDstEnd(),tzone.getDst(),tzone.getTimeZone(),tzone.getNextTimeZone()));
+		}
+
+			System.out.println(tzone.getZoneName());
+			
+			
+		/*try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+*/
 		}
 }
 
